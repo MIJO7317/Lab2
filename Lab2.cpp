@@ -36,12 +36,13 @@ Lab2::Lab2(QWidget *parent)
 	dm3.operator[](3) = op;
 	try 
 	{
-		dm3[2] = dm4[11];
+		dm3[2] = dm4[1];
 	}
 	catch(const char* str)
 	{
 		OutputError(str);
 	}
+	dm3.Resize(6);
 	for (int i = 0; i < dm3.Size(); i++)
 	{
 		if(dm3[i])
