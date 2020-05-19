@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "ErrorMessage.h"
 #include <optional>
 
@@ -13,18 +13,34 @@ template<typename T>
 class DynamicArray
 {
 public:
-	DynamicArray(size_t size = 0);
-	DynamicArray(size_t size, const T& default_element);
+	//Конструкторы:
+	DynamicArray(const size_t size = 0);
+	DynamicArray(const size_t size, const T& default_element);
 	DynamicArray(const T* const arr, size_t count, size_t start = 0);
-	DynamicArray(const DynamicArray<T>& arr);
-	std::optional<T> Get(size_t index) const;
-	void Set(size_t index, const T& value);
-	void Resize(size_t new_size);
-	size_t Size() const;
-	size_t Capacity() const;
-	DynamicArray<T>& operator=(const DynamicArray<T>& arr);
+	DynamicArray(const DynamicArray<T>& other);
+	DynamicArray(DynamicArray&& other);
+	//Доступ к элементам:
+	std::optional<T>& At(const size_t index);
 	std::optional<T>& operator[](const size_t index);
 	const std::optional<T>& operator[](const size_t index) const;
+	std::optional<T>& Front();
+	std::optional<T>& Back();
+	std::optional<T>* Data();
+	//Вместимость:
+    DynamicArray<T>& Resize(const size_t new_size);
+	size_t Size() const;
+	size_t Capacity() const;
+	bool Empty() const;
+	//Модификаторы:
+	DynamicArray<T>& PushFront(const T& element);
+	DynamicArray<T>& PushBack(const T& element);
+	DynamicArray<T>& Insert(const size_t index, const T& element, const size_t count = 1);
+	DynamicArray<T>& PopFront();
+	DynamicArray<T>& PopBack();
+	DynamicArray<T>& Erase(const size_t index, const size_t count = 1);
+	DynamicArray<T>& Clear();
+	DynamicArray<T>& operator=(const DynamicArray<T>& other);
+	DynamicArray<T>& operator=(DynamicArray&& other);
 	~DynamicArray() { delete[] this->data; }
 private:
 	std::optional<T>* data;
@@ -34,7 +50,7 @@ private:
 };
 
 template<typename T>
-DynamicArray<T>::DynamicArray(size_t size)
+DynamicArray<T>::DynamicArray(const size_t size)
 {
 	this->l_additional = this->r_additional = DEFAULT_BUFFER_SIZE;
 	this->count = size;
@@ -65,48 +81,54 @@ DynamicArray<T>::DynamicArray(const T* const arr, size_t count, size_t start) : 
 }
 
 template<typename T>
-DynamicArray<T>::DynamicArray(const DynamicArray<T>& arr) : DynamicArray(arr.count) 
+DynamicArray<T>::DynamicArray(const DynamicArray<T>& other) : DynamicArray(other.count) 
 {
 	for (size_t i = 0; i < this->count; i++)
 	{
-		this->data[i + this->l_additional] = arr.data[i + arr.l_additional];
+		this->data[i + this->l_additional] = other.data[i + other.l_additional];
 	}
 }
 
 template<typename T>
-std::optional<T> DynamicArray<T>::Get(size_t index) const
+DynamicArray<T>::DynamicArray(DynamicArray&& other)
 {
-	return index < this->count ? this->data[index + this->l_additional] : std::nullopt;
+	this->data = other.data;
+	other.data = nullptr;
+	this->l_additional = other.l_additional;
+	this->r_additional = other.r_additional;
+	this->count = other.count;
 }
 
 template<typename T>
-void DynamicArray<T>::Set(size_t index, const T& value)
+std::optional<T>& DynamicArray<T>::At(const size_t index)
 {
-	index < this->count ? this->data[index + this->l_additional] = value : std::nullopt;
+	if (index >= this->count)
+		throw "Out of range";
+	return this->data[index + this->l_additional];
 }
 
 template<typename T>
-void DynamicArray<T>::Resize(size_t new_size)
+DynamicArray<T>& DynamicArray<T>::Resize(const size_t new_size)
 {
 	if (new_size > this->Capacity())
 	{
-		std::optional<T>* new_array;
-		//��������� ������ ��� ����� ������
+		std::optional<T>* new_data;
+		//Выделение памяти под новый массив
 		try
 		{
-			new_array = new std::optional<T>[new_size + this->l_additional + this->r_additional];
+			new_data = new std::optional<T>[new_size + this->l_additional + this->r_additional];
 		}
 		catch (const std::bad_alloc & exc)
 		{
 			throw exc.what();
 		}
-		//���������� ������ ������� ���������� �� �������
+		//Заполнение нового массива значениями из старого
 		for (size_t i = 0; i < this->count; i++)
-			new_array[i + this->l_additional] = this->data[i + this->l_additional];
-		//�������� ������� �������
+			new_data[i + this->l_additional] = this->data[i + this->l_additional];
+		//Удаление старого массива
 		delete[] this->data;
-		//���������� ������ ������� �������
-		this->data = new_array;
+		//Присвоение нового массива старому
+		this->data = new_data;
 	}
 	else
 	{
@@ -115,6 +137,7 @@ void DynamicArray<T>::Resize(size_t new_size)
 		this->r_additional += this->count - new_size;
 	}
 	this->count = new_size;
+	return *this;
 }
 
 template<typename T>
@@ -130,16 +153,193 @@ size_t DynamicArray<T>::Capacity() const
 }
 
 template<typename T>
-DynamicArray<T>& DynamicArray<T>::operator=(const DynamicArray<T>& arr)
+bool DynamicArray<T>::Empty() const
 {
-	if (this == &arr)
+	for (size_t i = 0; i < this->count; i++)
+		if (this->data[i + this->l_additional] != std::nullopt)
+			return false;
+	return true;
+}
+
+template<typename T>
+DynamicArray<T>& DynamicArray<T>::PushFront(const T& element)
+{
+	if (l_additional != 0)
+	{
+		this->data[--l_additional] = element;
+	}
+	else
+	{
+		std::optional<T>* new_data;
+		this->l_additional = DEFAULT_BUFFER_SIZE;
+		//Выделение памяти под новый массив
+		try
+		{
+			new_data = new std::optional<T>[this->count + 1 + this->l_additional + this->r_additional];
+		}
+		catch (const std::bad_alloc & exc)
+		{
+			throw exc.what();
+		}
+		//Заполнение первой ячейки нового массива
+		new_data[this->l_additional] = element;
+		//Заполнение нового массива значениями из старого
+		for (size_t i = 0; i < this->count; i++)
+			new_data[i + 1 + this->l_additional] = this->data[i];
+		//Удаление старого массива
+		delete[] this->data;
+		//Присвоение нового массива старому
+		this->data = new_data;
+	}
+	this->count++;
+	return *this;
+}
+
+template<typename T>
+DynamicArray<T>& DynamicArray<T>::PushBack(const T& element)
+{
+	if (r_additional != 0)
+	{
+		this->data[this->l_additional+this->count] = element;
+		r_additional--;
+	}
+	else
+	{
+		std::optional<T>* new_data;
+		this->r_additional = DEFAULT_BUFFER_SIZE;
+		//Выделение памяти под новый массив
+		try
+		{
+			new_data = new std::optional<T>[this->count + 1 + this->l_additional + this->r_additional];
+		}
+		catch (const std::bad_alloc & exc)
+		{
+			throw exc.what();
+		}
+		//Заполнение нового массива значениями из старого
+		for (size_t i = 0; i < this->count; i++)
+			new_data[i + this->l_additional] = this->data[i + this->l_additional];
+		//Заполнение последней ячейки нового массива
+		new_data[this->l_additional + this->count] = element;
+		//Удаление старого массива
+		delete[] this->data;
+		//Присвоение нового массива старому
+		this->data = new_data;
+	}
+	this->count++;
+	return *this;
+}
+
+template<typename T>
+DynamicArray<T>& DynamicArray<T>::Insert(const size_t index, const T& element, const size_t count)
+{
+	if (this->l_additional + this->r_additional >= count)
+	{
+		size_t r_shift = this->r_additional >= count ? count : this->r_additional;
+		size_t l_shift = count - r_shift;
+		for (size_t i = this->count - 1; i >= index; i--)
+			std::swap(this->data[i + this->l_additional], this->data[i + this->l_additional + r_shift]);
+		if (l_shift)
+			for (size_t i = 0; i < index; i++)
+				std::swap(this->data[i + this->l_additional], this->data[i + this->l_additional - l_shift]);
+		this->l_additional -= l_shift;
+		this->r_additional -= r_shift;
+		for (size_t i = index; i < index + count; i++)
+			this->data[i + this->l_additional] = element;
+	}
+	else
+	{
+		std::optional<T>* new_data;
+		//Выделение памяти под новый массив
+		try
+		{
+			new_data = new std::optional<T>[this->count + count + this->l_additional + this->r_additional];
+		}
+		catch (const std::bad_alloc & exc)
+		{
+			throw exc.what();
+		}
+		//Заполнение нового массива значениями из старого
+		for (size_t i = 0; i < index; i++)
+			new_data[i + this->l_additional] = this->data[i + this->l_additional];
+		//Заполнение нового массива передаваемыми элементами
+		for (size_t i = index; i < index + count; i++)
+			new_data[i + this->l_additional] = element;
+		//Заполнение нового массива значениями из старого
+		for (size_t i = index + count; i < this->count + count; i++)
+			new_data[i + this->l_additional] = this->data[i - count + this->l_additional];
+		//Удаление старого массива
+		delete[] this->data;
+		//Присвоение нового массива старому
+		this->data = new_data;
+	}
+	this->count += count;
+	return *this;
+}
+
+template<typename T>
+DynamicArray<T>& DynamicArray<T>::PopFront()
+{
+	if (this->count-- == 0)
+		throw "Array is empty";
+	this->data[this->l_additional++] = std::nullopt;
+	return *this;
+}
+
+template<typename T>
+DynamicArray<T>& DynamicArray<T>::PopBack()
+{
+	if (this->count == 0)
+		throw "Array is empty";
+	this->data[this->l_additional+--this->count] = std::nullopt;
+	this->r_additional++;
+	return *this;
+}
+
+template<typename T>
+DynamicArray<T>& DynamicArray<T>::Erase(const size_t index, const size_t count)
+{
+	if (index + count > this->count)
+		throw "Out of range";
+	for (size_t i = index; i < index + count; i++)
+		this->data[i + this->l_additional] = std::nullopt;
+	size_t r_shift = count / 2;
+	size_t l_shift = count - r_shift;
+	if(r_shift)
+		for (size_t i = index+count; i < this->count; i++)
+			std::swap(this->data[i + this->l_additional], this->data[i + this->l_additional - r_shift]);
+	for (int i = index-1; i >= 0; i--)
+		std::swap(this->data[i + this->l_additional], this->data[i + this->l_additional + l_shift]);
+	this->l_additional += l_shift;
+	this->r_additional += r_shift;
+	this->count -= l_shift + r_shift;
+	return *this;
+}
+
+template<typename T>
+DynamicArray<T>& DynamicArray<T>::Clear()
+{
+	for (size_t i = 0; i < this->count; i++)
+		this->data[i + this->l_additional] = std::nullopt;
+	size_t l_additional_add = this->count / 2;
+	size_t r_additional_add = this->count - l_additional_add;
+	this->l_additional += l_additional_add;
+	this->r_additional += r_additional_add;
+	this->count = 0;
+	return *this;
+}
+
+template<typename T>
+DynamicArray<T>& DynamicArray<T>::operator=(const DynamicArray<T>& other)
+{
+	if (this == &other)
 		return *this;
-	if (this->Capacity() < arr.count)
+	if (this->Capacity() < other.count)
 	{
 		delete[] this->data;
 		try
 		{
-			this->data = new std::optional<T>[arr.count + this->r_additional + this->l_additional];
+			this->data = new std::optional<T>[other.count + this->r_additional + this->l_additional];
 		}
 		catch (const std::bad_alloc & exc)
 		{
@@ -148,15 +348,34 @@ DynamicArray<T>& DynamicArray<T>::operator=(const DynamicArray<T>& arr)
 	}
 	else
 	{
-		size_t l_additional_new = (this->Capacity() - arr.count) / 2;
-		size_t r_additional_new = this->Capacity() - arr.count - l_additional_new;
+		size_t l_additional_new = (this->Capacity() - other.count) / 2;
+		size_t r_additional_new = this->Capacity() - other.count - l_additional_new;
 
-		for (size_t i = 0; i < this->Capacity(); i++)
+		this->l_additional = l_additional_new;
+		this->r_additional = r_additional_new;
+
+		for (size_t i = 0; i < this->l_additional; i++)
+			this->data[i] = std::nullopt;
+		for (size_t i = this->l_additional + other.count; i < this->l_additional + this->r_additional + other.count; i++)
 			this->data[i] = std::nullopt;
 	}
-	for (size_t i = 0; i < arr.count; i++)
-		this->data[i + this->l_additional] = arr.data[i + arr.l_additional];
-	this->count = arr.count;
+	for (size_t i = 0; i < other.count; i++)
+		this->data[i + this->l_additional] = other.data[i + other.l_additional];
+	this->count = other.count;
+	return *this;
+}
+
+template<typename T>
+DynamicArray<T>& DynamicArray<T>::operator=(DynamicArray&& other)
+{
+	if (this == &other)
+		return *this;
+	delete[] this->data;
+	this->data = other.data;
+	other.data = nullptr;
+	this->l_additional = other.l_additional;
+	this->r_additional = other.r_additional;
+	this->count = other.count;
 	return *this;
 }
 
@@ -174,5 +393,29 @@ const std::optional<T>& DynamicArray<T>::operator[](const size_t index) const
 	if (index >= this->count)
 		throw "Invalid index";
 	return this->data[index + this->l_additional];
+}
+
+template<typename T>
+std::optional<T>& DynamicArray<T>::Front()
+{
+	if (this->count == 0)
+		throw "Array is empty";
+	return this->data[this->l_additional];
+}
+
+template<typename T>
+std::optional<T>& DynamicArray<T>::Back()
+{
+	if (this->count == 0)
+		throw "Array is empty";
+	return this->data[this->l_additional+this->count];
+}
+
+template<typename T>
+std::optional<T>* DynamicArray<T>::Data()
+{
+	if (this->count == 0)
+		throw "Array is empty";
+	return this->data+this->l_additional;
 }
 
