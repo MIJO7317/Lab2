@@ -1,4 +1,4 @@
-#pragma once
+п»ї#pragma once
 #include<iterator>
 
 template<typename T>
@@ -12,11 +12,11 @@ private:
 		Node* prev;
 	};
 
-	Node* head; //Первый элемент списка
-	Node* tail; //Элемент следующий за последним элементом списка
+	Node* head; //РџРµСЂРІС‹Р№ СЌР»РµРјРµРЅС‚ СЃРїРёСЃРєР°
+	Node* tail; //Р­Р»РµРјРµРЅС‚ СЃР»РµРґСѓСЋС‰РёР№ Р·Р° РїРѕСЃР»РµРґРЅРёРј СЌР»РµРјРµРЅС‚РѕРј СЃРїРёСЃРєР°
 	size_t size;
 
-	//Класс итератора:
+	//РљР»Р°СЃСЃ РёС‚РµСЂР°С‚РѕСЂР°:
 	template<class Iter>
 	class LinkedListIterator : public std::iterator<std::random_access_iterator_tag, Iter>
 	{
@@ -33,11 +33,11 @@ private:
 	};
 
 public:
-	//Для работы итератора со стандартными алгоритмами:
+	//Р”Р»СЏ СЂР°Р±РѕС‚С‹ РёС‚РµСЂР°С‚РѕСЂР° СЃРѕ СЃС‚Р°РЅРґР°СЂС‚РЅС‹РјРё Р°Р»РіРѕСЂРёС‚РјР°РјРё:
 	typedef LinkedListIterator<Node> iterator;
 	typedef LinkedListIterator<const Node> const_iterator;
 	
-	//Конструкторы:
+	//РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂС‹:
 	LinkedList();
 	LinkedList(const T* const array, size_t count, size_t start = 0);
 
@@ -52,7 +52,7 @@ public:
 	~LinkedList();
 };
 
-//Методы итератора:
+//РњРµС‚РѕРґС‹ РёС‚РµСЂР°С‚РѕСЂР°:
 
 template<typename T>
 template<class Iter>
@@ -87,7 +87,7 @@ LinkedList<T>::LinkedListIterator<Iter>& LinkedList<T>::LinkedListIterator<Iter>
 	return *this;
 }
 
-//Методы LinkedList
+//РњРµС‚РѕРґС‹ LinkedList
 
 template<typename T>
 LinkedList<T>::LinkedList() : size(0)
