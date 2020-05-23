@@ -1,5 +1,6 @@
 #include "Lab2.h"
 #include "DynamicArray.h"
+#include "LinkedList.h"
 #include "ErrorMessage.h"
 #include <string>
 #include <vector>
@@ -11,19 +12,18 @@ Lab2::Lab2(QWidget *parent)
 {
 	ui.setupUi(this);
 	std::string str = "";
-	int* arr = new int[10]{0,1,2,3,4,5,6,7,8,9};
+	int arr[10] = {0,1,2,3,4,5,6,7,8,9};
 	//struct Point
 	//{
 	//	float x;
 	//	float y;
 	//};
-	std::vector<int> arr2(10);
+	std::vector<int> arr2(2);
 	//Point p{};
 	//for (size_t i = 0; i < arr2.size(); i++)
 	//{
 	//	arr2[i] = i;
 	//}
-	arr2.erase(arr2.begin() + 2);
 	//for (size_t i = 0; i < arr2.size(); i++)
 	//{
 	//	/*str += std::to_string(arr2[i]);*/
@@ -63,13 +63,13 @@ Lab2::Lab2(QWidget *parent)
 	dm3.PushBack(7);
 	dm3.PopFront();
 	dm3.PopBack();
-	for (size_t i = 0; i < dm3.Size(); i++)
+	/*for (size_t i = 0; i < dm3.Size(); i++)
 	{
 		if (dm3[i])
 			str += std::to_string(dm3[i].value());
 		else
 			str += std::to_string(0);
-	}
+	}*/
 	//try
 	//{
 	//
@@ -78,5 +78,14 @@ Lab2::Lab2(QWidget *parent)
 	//{
 	//	std::cout << ex.what();
 	//}
+	DynamicArray<char> dm_char;
+	for (size_t i = 0; i < 100; i++)
+		dm_char.PushBack('a');
+	LinkedList<int> list;
+	list.PushBack(5).PushBack(6).PushBack(9);
+	for (auto el : list)
+	{
+		str += std::to_string(el);
+	}
 	ui.lineEdit->setText(str.c_str());
 }

@@ -2,8 +2,7 @@
 #include "ErrorMessage.h"
 #include <optional>
 
-#define DEFAULT_BUFFER_SIZE 16
-
+#define DEFAULT_BUFFER_SIZE 128
 //DynamicArray {a,b,c,d,e,f,g} approximate scheme:
 //[][][][][][][] [a][b][c][d][e][f][g] [][][][][][][][]
 //_l_additional__________count___________r_additional__ } - capacity
@@ -18,7 +17,7 @@ public:
 	DynamicArray(const size_t size, const T& default_element);
 	DynamicArray(const T* const arr, size_t count, size_t start = 0);
 	DynamicArray(const DynamicArray<T>& other);
-	DynamicArray(DynamicArray&& other);
+	DynamicArray(DynamicArray<T>&& other);
 	//Доступ к элементам:
 	std::optional<T>& At(const size_t index);
 	std::optional<T>& operator[](const size_t index);
@@ -40,19 +39,24 @@ public:
 	DynamicArray<T>& Erase(const size_t index, const size_t count = 1);
 	DynamicArray<T>& Clear();
 	DynamicArray<T>& operator=(const DynamicArray<T>& other);
-	DynamicArray<T>& operator=(DynamicArray&& other);
+	DynamicArray<T>& operator=(DynamicArray<T>&& other);
+	//Деструктор:
 	~DynamicArray() { delete[] this->data; }
 private:
 	std::optional<T>* data;
 	size_t l_additional;
 	size_t r_additional;
 	size_t count;
+	size_t r_buffer;
+	size_t l_buffer;
 };
 
 template<typename T>
 DynamicArray<T>::DynamicArray(const size_t size)
 {
-	this->l_additional = this->r_additional = DEFAULT_BUFFER_SIZE;
+	this->l_buffer = this->r_buffer = DEFAULT_BUFFER_SIZE;
+	this->l_additional = this->l_buffer;
+	this->r_additional = this->r_buffer;
 	this->count = size;
 	try
 	{
@@ -90,13 +94,15 @@ DynamicArray<T>::DynamicArray(const DynamicArray<T>& other) : DynamicArray(other
 }
 
 template<typename T>
-DynamicArray<T>::DynamicArray(DynamicArray&& other)
+DynamicArray<T>::DynamicArray(DynamicArray<T>&& other)
 {
 	this->data = other.data;
 	other.data = nullptr;
 	this->l_additional = other.l_additional;
 	this->r_additional = other.r_additional;
 	this->count = other.count;
+	this->r_buffer = other.r_buffer;
+	this->l_buffer = other.l_buffer;
 }
 
 template<typename T>
@@ -171,11 +177,14 @@ DynamicArray<T>& DynamicArray<T>::PushFront(const T& element)
 	else
 	{
 		std::optional<T>* new_data;
-		this->l_additional = DEFAULT_BUFFER_SIZE;
+		//Удвоение буффера
+		this->l_buffer *= 2;
+		//Изменение вместимости
+		this->l_additional = this->l_buffer;
 		//Выделение памяти под новый массив
 		try
 		{
-			new_data = new std::optional<T>[this->count + 1 + this->l_additional + this->r_additional];
+			new_data = new std::optional<T>[this->Capacity() + 1];
 		}
 		catch (const std::bad_alloc & exc)
 		{
@@ -206,11 +215,14 @@ DynamicArray<T>& DynamicArray<T>::PushBack(const T& element)
 	else
 	{
 		std::optional<T>* new_data;
-		this->r_additional = DEFAULT_BUFFER_SIZE;
+		//Удвоение буффера
+		this->r_buffer *= 2;
+		//Изменение вместимости
+		this->r_additional = this->r_buffer;
 		//Выделение памяти под новый массив
 		try
 		{
-			new_data = new std::optional<T>[this->count + 1 + this->l_additional + this->r_additional];
+			new_data = new std::optional<T>[this->Capacity() + 1];
 		}
 		catch (const std::bad_alloc & exc)
 		{
@@ -250,10 +262,13 @@ DynamicArray<T>& DynamicArray<T>::Insert(const size_t index, const T& element, c
 	else
 	{
 		std::optional<T>* new_data;
+		//Удвоение буффера
+		this->r_buffer *= 2;
+		this->l_buffer *= 2;
 		//Выделение памяти под новый массив
 		try
 		{
-			new_data = new std::optional<T>[this->count + count + this->l_additional + this->r_additional];
+			new_data = new std::optional<T>[this->count + count + this->l_buffer + this->r_buffer];
 		}
 		catch (const std::bad_alloc & exc)
 		{
@@ -261,17 +276,20 @@ DynamicArray<T>& DynamicArray<T>::Insert(const size_t index, const T& element, c
 		}
 		//Заполнение нового массива значениями из старого
 		for (size_t i = 0; i < index; i++)
-			new_data[i + this->l_additional] = this->data[i + this->l_additional];
+			new_data[i + this->l_buffer] = this->data[i + this->l_additional];
 		//Заполнение нового массива передаваемыми элементами
 		for (size_t i = index; i < index + count; i++)
-			new_data[i + this->l_additional] = element;
+			new_data[i + this->l_buffer] = element;
 		//Заполнение нового массива значениями из старого
 		for (size_t i = index + count; i < this->count + count; i++)
-			new_data[i + this->l_additional] = this->data[i - count + this->l_additional];
+			new_data[i + this->l_buffer] = this->data[i - count + this->l_additional];
 		//Удаление старого массива
 		delete[] this->data;
 		//Присвоение нового массива старому
 		this->data = new_data;
+		//Изменение вместимости
+		this->l_additional = this->l_buffer;
+		this->r_additional = this->r_buffer;
 	}
 	this->count += count;
 	return *this;
@@ -366,7 +384,7 @@ DynamicArray<T>& DynamicArray<T>::operator=(const DynamicArray<T>& other)
 }
 
 template<typename T>
-DynamicArray<T>& DynamicArray<T>::operator=(DynamicArray&& other)
+DynamicArray<T>& DynamicArray<T>::operator=(DynamicArray<T>&& other)
 {
 	if (this == &other)
 		return *this;
