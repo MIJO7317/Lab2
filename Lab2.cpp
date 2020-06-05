@@ -4,8 +4,10 @@
 #include "ErrorMessage.h"
 #include <string>
 #include <vector>
+#include <list>
 #include <optional>
 #include <iostream>
+#include "vld.h"
 
 Lab2::Lab2(QWidget *parent)
 	: QWidget(parent)
@@ -19,6 +21,12 @@ Lab2::Lab2(QWidget *parent)
 	//	float y;
 	//};
 	std::vector<int> arr2(2);
+	std::list<int> ls;// = {0,1,2,3,4,5};
+	//ls.back();
+	//ls.erase(ls.end());
+	//auto it = ls.begin();
+	//it++;
+	//ls.erase(it);
 	//Point p{};
 	//for (size_t i = 0; i < arr2.size(); i++)
 	//{
@@ -70,20 +78,28 @@ Lab2::Lab2(QWidget *parent)
 		else
 			str += std::to_string(0);
 	}*/
-	//try
-	//{
-	//
-	//}
-	//catch (std::exception & ex)
-	//{
-	//	std::cout << ex.what();
-	//}
+	/*try
+	{
+		arr2.begin()--;
+	}
+	catch (std::exception & ex)
+	{
+		std::cout << ex.what();
+	}*/
 	DynamicArray<char> dm_char;
 	for (size_t i = 0; i < 100; i++)
 		dm_char.PushBack('a');
 	LinkedList<int> list;
-	list.PushBack(5).PushBack(6).PushBack(9);
-	for (auto el : list)
+	//list.PopBack();
+	list.Insert(list.begin(), 0);
+	list.PushBack(5);
+	list.Insert(list.end(),7);
+	LinkedList<int> list2 = LinkedList<int>(2,9);
+	list = list2;
+	list = LinkedList<int>(4,6);
+	LinkedList<double> list3 = {1.4, 3.1415, 1.8, 0.0001};
+	list3 = {1.6, 0.1, 4, 6.8, 23456};
+	for (auto el : list3)
 	{
 		str += std::to_string(el);
 	}

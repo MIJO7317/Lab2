@@ -2,7 +2,7 @@
 #include "ErrorMessage.h"
 #include <optional>
 
-#define DEFAULT_BUFFER_SIZE 128
+constexpr size_t DEFAULT_BUFFER_SIZE = 32;
 //DynamicArray {a,b,c,d,e,f,g} approximate scheme:
 //[][][][][][][] [a][b][c][d][e][f][g] [][][][][][][][]
 //_l_additional__________count___________r_additional__ } - capacity
@@ -13,30 +13,30 @@ class DynamicArray
 {
 public:
 	//Конструкторы:
-	DynamicArray(const size_t size = 0);
-	DynamicArray(const size_t size, const T& default_element);
+	DynamicArray(size_t size = 0);
+	DynamicArray(size_t size, const T& default_element);
 	DynamicArray(const T* const arr, size_t count, size_t start = 0);
 	DynamicArray(const DynamicArray<T>& other);
 	DynamicArray(DynamicArray<T>&& other);
 	//Доступ к элементам:
-	std::optional<T>& At(const size_t index);
-	std::optional<T>& operator[](const size_t index);
-	const std::optional<T>& operator[](const size_t index) const;
+	std::optional<T>& At(size_t index);
+	std::optional<T>& operator[](size_t index);
+	const std::optional<T>& operator[](size_t index) const;
 	std::optional<T>& Front();
 	std::optional<T>& Back();
 	std::optional<T>* Data();
 	//Вместимость:
-    DynamicArray<T>& Resize(const size_t new_size);
+    DynamicArray<T>& Resize(size_t new_size);
 	size_t Size() const;
 	size_t Capacity() const;
 	bool Empty() const;
 	//Модификаторы:
 	DynamicArray<T>& PushFront(const T& element);
 	DynamicArray<T>& PushBack(const T& element);
-	DynamicArray<T>& Insert(const size_t index, const T& element, const size_t count = 1);
+	DynamicArray<T>& Insert(size_t index, const T& element, size_t count = 1);
 	DynamicArray<T>& PopFront();
 	DynamicArray<T>& PopBack();
-	DynamicArray<T>& Erase(const size_t index, const size_t count = 1);
+	DynamicArray<T>& Erase(size_t index, size_t count = 1);
 	DynamicArray<T>& Clear();
 	DynamicArray<T>& operator=(const DynamicArray<T>& other);
 	DynamicArray<T>& operator=(DynamicArray<T>&& other);
@@ -52,7 +52,7 @@ private:
 };
 
 template<typename T>
-DynamicArray<T>::DynamicArray(const size_t size)
+DynamicArray<T>::DynamicArray(size_t size)
 {
 	this->l_buffer = this->r_buffer = DEFAULT_BUFFER_SIZE;
 	this->l_additional = this->l_buffer;
@@ -106,7 +106,7 @@ DynamicArray<T>::DynamicArray(DynamicArray<T>&& other)
 }
 
 template<typename T>
-std::optional<T>& DynamicArray<T>::At(const size_t index)
+std::optional<T>& DynamicArray<T>::At(size_t index)
 {
 	if (index >= this->count)
 		throw "Out of range";
@@ -114,7 +114,7 @@ std::optional<T>& DynamicArray<T>::At(const size_t index)
 }
 
 template<typename T>
-DynamicArray<T>& DynamicArray<T>::Resize(const size_t new_size)
+DynamicArray<T>& DynamicArray<T>::Resize(size_t new_size)
 {
 	if (new_size > this->Capacity())
 	{
@@ -243,7 +243,7 @@ DynamicArray<T>& DynamicArray<T>::PushBack(const T& element)
 }
 
 template<typename T>
-DynamicArray<T>& DynamicArray<T>::Insert(const size_t index, const T& element, const size_t count)
+DynamicArray<T>& DynamicArray<T>::Insert(size_t index, const T& element, size_t count)
 {
 	if (this->l_additional + this->r_additional >= count)
 	{
@@ -315,7 +315,7 @@ DynamicArray<T>& DynamicArray<T>::PopBack()
 }
 
 template<typename T>
-DynamicArray<T>& DynamicArray<T>::Erase(const size_t index, const size_t count)
+DynamicArray<T>& DynamicArray<T>::Erase(size_t index, size_t count)
 {
 	if (index + count > this->count)
 		throw "Out of range";
@@ -398,7 +398,7 @@ DynamicArray<T>& DynamicArray<T>::operator=(DynamicArray<T>&& other)
 }
 
 template<typename T>
-std::optional<T>& DynamicArray<T>::operator[](const size_t index)
+std::optional<T>& DynamicArray<T>::operator[](size_t index)
 {
 	if(index >= this->count)
 		throw "Invalid index";
@@ -406,7 +406,7 @@ std::optional<T>& DynamicArray<T>::operator[](const size_t index)
 }
 
 template<typename T>
-const std::optional<T>& DynamicArray<T>::operator[](const size_t index) const
+const std::optional<T>& DynamicArray<T>::operator[](size_t index) const
 {
 	if (index >= this->count)
 		throw "Invalid index";
