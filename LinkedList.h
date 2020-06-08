@@ -16,6 +16,7 @@ private:
 	Node* tail; //Элемент следующий за последним элементом списка
 	size_t size;
 
+public:
 	//Класс итератора:
 	template<class Iter>
 	class LinkedListIterator : public std::iterator<std::bidirectional_iterator_tag, Iter>
@@ -38,11 +39,8 @@ private:
 		LinkedListIterator<Iter> operator++(int);//Постфикс
 		LinkedListIterator<Iter> operator--(int);//Постфикс
 	};
-
-public:
 	//Для работы итератора со стандартными алгоритмами:
 	using iterator = LinkedListIterator<Node>;
-	
 	//Конструкторы:
 	LinkedList();
 	LinkedList(size_t count, const T& value);
@@ -52,8 +50,10 @@ public:
 	//Доступ к элементам:
 	T& Front();
 	T& Back();
+	T Front() const;
+	T Back() const;
 	//Вместимость:
-	size_t Size();
+	size_t Size() const;
 	//Модификаторы:
 	void Clear();
 	iterator Insert(iterator pos, const T& value);
@@ -102,7 +102,7 @@ template<class Iter>
 T& LinkedList<T>::LinkedListIterator<Iter>::operator*()
 {
 	if (this->ptr->next == nullptr)
-		throw "Can't dereference out of range LinkedList iterator";
+		throw std::exception("Can't dereference out of range LinkedList iterator");
 	return this->ptr->data;
 }
 
@@ -111,7 +111,7 @@ template<class Iter>
 LinkedList<T>::LinkedListIterator<Iter>& LinkedList<T>::LinkedListIterator<Iter>::operator++()
 {
 	if(this->ptr->next == nullptr)
-		throw "Can't increment LinkedList iterator past end";
+		throw std::exception("Can't increment LinkedList iterator past end");
 	this->ptr = this->ptr->next;
 	return *this;
 }
@@ -121,7 +121,7 @@ template<class Iter>
 LinkedList<T>::LinkedListIterator<Iter>& LinkedList<T>::LinkedListIterator<Iter>::operator--()
 {
 	if (this->ptr->prev == nullptr)
-		throw "Can't decrement LinkedList iterator before begin";
+		throw std::exception("Can't decrement LinkedList iterator before begin");
 	this->ptr = this->ptr->prev;
 	return *this;
 }
@@ -196,12 +196,26 @@ template<typename T>
 T& LinkedList<T>::Back()
 {
 	if(std::prev(this->end()) == nullptr)
-		throw "Back called on empty LinkedList";
+		throw std::exception("Back called on empty LinkedList");
 	return *std::prev(this->end());
 }
 
 template<typename T>
-size_t LinkedList<T>::Size()
+T LinkedList<T>::Front() const
+{
+	return *const_cast<LinkedList*>(this)->begin();//Нет const_iterator
+}
+
+template<typename T>
+T LinkedList<T>::Back() const
+{
+	if (std::prev(const_cast<LinkedList*>(this)->end()) == nullptr)//Нет const_iterator
+		throw std::exception("Back called on empty LinkedList");
+	return *std::prev(const_cast<LinkedList*>(this)->end());
+}
+
+template<typename T>
+size_t LinkedList<T>::Size() const
 {
 	return this->size;
 }
@@ -236,7 +250,7 @@ typename LinkedList<T>::iterator LinkedList<T>::Erase(iterator pos)
 {
 	this->size--;
 	if (pos == this->end())
-		throw "Can't delete iterator end of the LinkedList";
+		throw std::exception("Can't delete iterator end of the LinkedList");
 	pos.ptr->next->prev = pos.ptr->prev;
 	if (pos.ptr->prev == nullptr)
 		this->head = pos.ptr->next;
@@ -263,7 +277,7 @@ template<typename T>
 void LinkedList<T>::PopBack()
 {
 	if (std::prev(this->end()) == nullptr)
-		throw "PopBack called on empty list";
+		throw std::exception("PopBack called on empty list");
 	this->Erase(std::prev(this->end()));
 }
 

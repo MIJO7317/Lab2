@@ -94,10 +94,14 @@
     <QtRcc Include="Lab2.qrc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ArraySequence.h" />
     <ClInclude Include="DynamicArray.h" />
     <ClInclude Include="ErrorMessage.h" />
     <ClInclude Include="LinkedList.h" />
+    <ClInclude Include="ListSequence.h" />
     <ClInclude Include="Sequence.h" />
+    <ClInclude Include="CString.h" />
+    <ClInclude Include="StringBuilder.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

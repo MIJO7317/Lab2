@@ -1,7 +1,11 @@
 #include "Lab2.h"
 #include "DynamicArray.h"
 #include "LinkedList.h"
-#include "ErrorMessage.h"
+#include "ListSequence.h"
+#include "ArraySequence.h"
+//#include "ErrorMessage.h"
+#include "StringBuilder.h"
+#include "CString.h"
 #include <string>
 #include <vector>
 #include <list>
@@ -103,5 +107,21 @@ Lab2::Lab2(QWidget *parent)
 	{
 		str += std::to_string(el);
 	}
+	Sequence<int>* seq1 = new ArraySequence(4,5);
+	Sequence<int>* seq2 = new ListSequence{1,1,1,1,5,1,1,3,1};
+	seq1->Concat(seq1);
+	seq1->Set(8, 1);
+	int a = seq1->Get(2);
+	seq1->RemoveAll(5);
+	delete seq1;
+	delete seq2;
+	StringBuilder str_build = "Stas124";
+	char ch = str_build.CharAt(3);
+	str_build.Insert(4, "Julia");
+	str_build.Remove(0, 4);
+	CString str_string = str_build.ToString();
+	char ch1 = str_string.CharAt(0);
+	CString sub_str = str_string.SubString(1, 2);
+	size_t index = str_string.FindSubString(sub_str);
 	ui.lineEdit->setText(str.c_str());
 }

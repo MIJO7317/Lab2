@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include "ErrorMessage.h"
 #include <optional>
 
 constexpr size_t DEFAULT_BUFFER_SIZE = 32;
@@ -18,12 +17,16 @@ public:
 	DynamicArray(const T* const arr, size_t count, size_t start = 0);
 	DynamicArray(const DynamicArray<T>& other);
 	DynamicArray(DynamicArray<T>&& other);
+	DynamicArray(std::initializer_list<T> init);
 	//Доступ к элементам:
 	std::optional<T>& At(size_t index);
+	std::optional<T> At(size_t index) const;
 	std::optional<T>& operator[](size_t index);
 	const std::optional<T>& operator[](size_t index) const;
 	std::optional<T>& Front();
 	std::optional<T>& Back();
+	std::optional<T> Front() const;
+	std::optional<T> Back() const;
 	std::optional<T>* Data();
 	//Вместимость:
     DynamicArray<T>& Resize(size_t new_size);
@@ -106,10 +109,27 @@ DynamicArray<T>::DynamicArray(DynamicArray<T>&& other)
 }
 
 template<typename T>
+DynamicArray<T>::DynamicArray(std::initializer_list<T> init) : DynamicArray(init.size())
+{
+	for (size_t i = 0; i < init.size(); i++)
+	{
+		this->data[i + this->l_additional] = *(init.begin()+i);
+	}
+}
+
+template<typename T>
 std::optional<T>& DynamicArray<T>::At(size_t index)
 {
 	if (index >= this->count)
-		throw "Out of range";
+		throw std::exception("Out of range");
+	return this->data[index + this->l_additional];
+}
+
+template<typename T>
+std::optional<T> DynamicArray<T>::At(size_t index) const
+{
+	if (index >= this->count)
+		throw std::exception("Out of range");
 	return this->data[index + this->l_additional];
 }
 
@@ -245,6 +265,10 @@ DynamicArray<T>& DynamicArray<T>::PushBack(const T& element)
 template<typename T>
 DynamicArray<T>& DynamicArray<T>::Insert(size_t index, const T& element, size_t count)
 {
+	if (index > this->count)
+		throw std::exception("Invalid index");
+	if (index == this->count)
+		return this->PushBack(element);
 	if (this->l_additional + this->r_additional >= count)
 	{
 		size_t r_shift = this->r_additional >= count ? count : this->r_additional;
@@ -299,7 +323,7 @@ template<typename T>
 DynamicArray<T>& DynamicArray<T>::PopFront()
 {
 	if (this->count-- == 0)
-		throw "Array is empty";
+		throw std::exception("Array is empty");
 	this->data[this->l_additional++] = std::nullopt;
 	return *this;
 }
@@ -308,7 +332,7 @@ template<typename T>
 DynamicArray<T>& DynamicArray<T>::PopBack()
 {
 	if (this->count == 0)
-		throw "Array is empty";
+		throw std::exception("Array is empty");
 	this->data[this->l_additional+--this->count] = std::nullopt;
 	this->r_additional++;
 	return *this;
@@ -318,7 +342,7 @@ template<typename T>
 DynamicArray<T>& DynamicArray<T>::Erase(size_t index, size_t count)
 {
 	if (index + count > this->count)
-		throw "Out of range";
+		throw std::exception("Out of range");
 	for (size_t i = index; i < index + count; i++)
 		this->data[i + this->l_additional] = std::nullopt;
 	size_t r_shift = count / 2;
@@ -401,7 +425,7 @@ template<typename T>
 std::optional<T>& DynamicArray<T>::operator[](size_t index)
 {
 	if(index >= this->count)
-		throw "Invalid index";
+		throw std::exception("Invalid index");
 	return this->data[index + this->l_additional];
 }
 
@@ -409,7 +433,7 @@ template<typename T>
 const std::optional<T>& DynamicArray<T>::operator[](size_t index) const
 {
 	if (index >= this->count)
-		throw "Invalid index";
+		throw std::exception("Invalid index");
 	return this->data[index + this->l_additional];
 }
 
@@ -417,7 +441,7 @@ template<typename T>
 std::optional<T>& DynamicArray<T>::Front()
 {
 	if (this->count == 0)
-		throw "Array is empty";
+		throw std::exception("Array is empty");
 	return this->data[this->l_additional];
 }
 
@@ -425,15 +449,31 @@ template<typename T>
 std::optional<T>& DynamicArray<T>::Back()
 {
 	if (this->count == 0)
-		throw "Array is empty";
+		throw std::exception("Array is empty");
 	return this->data[this->l_additional+this->count];
+}
+
+template<typename T>
+std::optional<T> DynamicArray<T>::Front() const
+{
+	if (this->count == 0)
+		throw std::exception("Array is empty");
+	return this->data[this->l_additional];
+}
+
+template<typename T>
+inline std::optional<T> DynamicArray<T>::Back() const
+{
+	if (this->count == 0)
+		throw std::exception("Array is empty");
+	return this->data[this->l_additional + this->count];
 }
 
 template<typename T>
 std::optional<T>* DynamicArray<T>::Data()
 {
 	if (this->count == 0)
-		throw "Array is empty";
+		throw std::exception("Array is empty");
 	return this->data+this->l_additional;
 }
 
