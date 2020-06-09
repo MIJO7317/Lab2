@@ -141,26 +141,22 @@ void StringBuilder::Prepend(char ch)
 
 void StringBuilder::Prepend(const char* str)
 {
-	for (size_t i = 0; str[i] != '\0'; i++)
-		this->str->Prepend(str[i]);
+	this->Insert(0, str);
 }
 
 void StringBuilder::Prepend(const std::string& str)
 {
-	for (auto ch : str)
-		this->str->Prepend(ch);
+	this->Insert(0, str);
 }
 
 void StringBuilder::Prepend(const StringBuilder& str)
 {
-	for (size_t i = 0; i < str.Size(); i++)
-		this->str->Prepend(str.CharAt(i));
+	this->Insert(0, str);
 }
 
 void StringBuilder::Prepend(const CString& str)
 {
-	for (size_t i = 0; i < str.Size(); i++)
-		this->str->Prepend(str.CharAt(i));
+	this->Insert(0, str);
 }
 
 void StringBuilder::Insert(size_t index, char ch)

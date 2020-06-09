@@ -103,8 +103,6 @@ size_t CString::FindSubString(const char* str)
 	size_t index = this->Size();
 	for (size_t i = 0; i < this->Size(); i++)
 	{
-		if (str[check] == '\0')
-			return index;
 		if (this->CharAt(i) == str[check])
 		{
 			if (prev)
@@ -116,8 +114,12 @@ size_t CString::FindSubString(const char* str)
 		else
 		{
 			prev = false;
-			check = 0;
+			if (check != 0)
+				i = index,
+				check = 0;
 		}
+		if (str[check] == '\0')
+			return index;
 	}
 	return this->Size();
 }
@@ -134,8 +136,6 @@ size_t CString::FindSubString(const CString& str)
 	size_t index = this->Size();
 	for (size_t i = 0; i < this->Size(); i++)
 	{
-		if (check == str.Size())
-			return index;
 		if (this->CharAt(i) == str.CharAt(check))
 		{
 			if (prev)
@@ -147,8 +147,12 @@ size_t CString::FindSubString(const CString& str)
 		else
 		{
 			prev = false;
-			check = 0;
+			if (check != 0)
+				i = index,
+				check = 0;
 		}
+		if (check == str.Size())
+			return index;
 	}
 	return this->Size();
 }

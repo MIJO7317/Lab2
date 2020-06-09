@@ -82,13 +82,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Lab2.cpp" />
+    <ClCompile Include="Lab2Test.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="StringValidator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Lab2.h" />
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="Lab2.ui" />
+    <QtUic Include="Lab2Test.ui" />
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="Lab2.qrc" />
@@ -96,12 +99,14 @@
   <ItemGroup>
     <ClInclude Include="ArraySequence.h" />
     <ClInclude Include="DynamicArray.h" />
-    <ClInclude Include="ErrorMessage.h" />
+    <QtMoc Include="Lab2Test.h" />
     <ClInclude Include="LinkedList.h" />
     <ClInclude Include="ListSequence.h" />
     <ClInclude Include="Sequence.h" />
     <ClInclude Include="CString.h" />
     <ClInclude Include="StringBuilder.h" />
+    <QtMoc Include="StringValidator.h" />
+    <ClInclude Include="Tests.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

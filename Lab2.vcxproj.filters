@@ -31,14 +31,29 @@
     <ClCompile Include="Lab2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="StringValidator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Lab2Test.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Lab2.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="StringValidator.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Lab2Test.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="Lab2.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="Lab2Test.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>
@@ -49,9 +64,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sequence.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ErrorMessage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DynamicArray.h">
@@ -70,6 +82,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CString.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Tests.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
